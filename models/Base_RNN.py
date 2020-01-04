@@ -4,15 +4,15 @@ import torch.nn.functional as F
 
 class Base_RNN(nn.Module):
 
-    def __init__(self, vocab_size, max_len, hidden_size, input_dropout_p, dropout_p, n_layers, cell_type = "RNN"):
+    def __init__(self, vocab_size, hidden_size, input_dropout_p, dropout_p, n_layers, cell_type = "RNN"):
         super(Base_RNN, self).__init__()
 
         self.vocab_size = vocab_size
-        self.hidden_size = hidden_size
+        self.hidden_layer = hidden_size
         self.input_dropout_p = input_dropout_p
-        self.dropout_p = nn.Dropout(p = self.input_dropout_p)
+        self.input_dropout = nn.Dropout(p = self.input_dropout_p)
         self.n_layers = n_layers
-
+        self.dropout_p = dropout_p
         
         if cell_type.lower() == 'lstm':
             self.rnn_cell = nn.LSTM
@@ -23,7 +23,6 @@ class Base_RNN(nn.Module):
         else:
             raise ValueError("Unsupported RNN Cell: {0}".format(cell_type))
         
-        self.dropout_p = dropout_p
 
         
 

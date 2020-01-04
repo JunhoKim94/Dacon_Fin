@@ -3,6 +3,11 @@ import pandas as pd
 from torch import nn,tensor
 from sklearn.preprocessing import StandardScaler,RobustScaler,MinMaxScaler,MaxAbsScaler
 import konlpy
+from konlpy.tag import *
+from tqdm import tqdm
+import torch
+from multiprocessing import Pool
+from functools import partial
 
 
 """
@@ -27,16 +32,115 @@ cumprod 맨 첫번째 성분부터 각 성분까지의 누적곱을 계산 (1에
 #iloc --> 인덱스로 접근 가능 loc --> 키워드 접근도 가능
 
 
-def tokenizing(batch_size ,tokenizer = Kkma()):
+
+def corpus_span(data ,tokenizer = Kkma(), corpus = None, stop_words = []):
     
     tokenizer = tokenizer
-    elements = dict()
+    
+    if corpus:
+        elements = corpus
+    
+    else:
+        elements = dict()
+    
+    tokens = dict()
 
-    for iteration in range(batch_size):
-        temp = tokenizer.morphs(batch_x.iloc[iteration])
+    for iteration in tqdm(range(len(data)), desc = "진행상황"):
+        temp_token = []
+        temp = tokenizer.nouns(data[iteration])
         for item in temp:
-            if item not in elements.keys():
-                num = len(elements)
-                elements[item] = num
+            if item in stop_words:
+                continue
+
+            if elements.get(item) == None:
+
+                if corpus:
+                    pass
+
+                else:
+                    num = len(elements) + 1
+                    elements[item] = num
+                    temp_token.append(num)
+
+            else:
+                temp_token.append(elements[item])
+
+            
+        tokens[iteration] = temp_token
                 
-    return elements
+    return elements, tokens
+
+
+def padding(tokenized_data, PAD = 0, evaluation = False, max_len = 0):
+    '''
+    tokenized_data : dictionary for training (key = number, items = Sequence)
+    '''
+    if evaluation:
+        max_len = max_len
+    else:
+        length = [len(s) for s in tokenized_data.values()]
+        max_len = max(length)
+    
+    padded_data = torch.zeros(len(tokenized_data), max_len)
+    padded_data.fill_(PAD)
+
+    for i in tqdm(range(len(tokenized_data)), desc = "Padding"):
+        sample = tokenized_data[i]
+        seq = len(sample)
+        #eval 모드 일때 seq가 max_len보다 커질 경우 cutting
+        if seq > max_len:
+            sample = sample[:max_len]
+        padded_data[i].narrow(0,0,seq).copy_(torch.LongTensor(sample))
+            
+    
+    return padded_data.to(torch.long), max_len
+
+
+
+
+
+
+
+'''
+def func(temp, stop_words, elements, corpus):
+    temp_token = []
+    for item in temp:
+        if item in stop_words:
+            continue
+
+        if elements.get(item) == None:
+
+            if corpus:
+                pass
+
+            else:
+                num = len(elements) + 1
+                elements[item] = num
+                temp_token.append(num)
+
+        else:
+            temp_token.append(elements[item])
+
+    return temp_token
+
+def pooling_corpus_span(data ,tokenizer = Kkma(), corpus = None, stop_words = []):
+
+    tokenizer = tokenizer
+    
+    if corpus:
+        elements = corpus
+    
+    else:
+        elements = dict()
+    
+    tokens = dict()
+
+    for iteration in tqdm(range(len(data)), desc = "진행상황"):
+
+        temp = tokenizer.nouns(data.iloc[iteration])
+        with Pool(32) as p:
+            temp_token = p.map(partial(func, stop_words = stop_words, elements = elements, corpus = corpus), temp)
+            
+        tokens[iteration] = temp_token
+                
+    return elements, tokens'''
