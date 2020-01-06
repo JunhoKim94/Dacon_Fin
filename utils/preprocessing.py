@@ -26,22 +26,18 @@ std, var 전체 성분의 표준편차, 분산을 계산
 cumsum 맨 첫 번째 성분부터 각 성분까지의 누적합을 계산 (0에서부터 계속 더해짐)
 cumprod 맨 첫번째 성분부터 각 성분까지의 누적곱을 계산 (1에서부터 계속 곱해짐)
 """
+
 #train_data = np.loadtxt("./data/train.csv", delimiter = ",")
 #train_data = pd.read_csv("./data/train.csv")
 #iloc과 loc 사용해서 추출
 #iloc --> 인덱스로 접근 가능 loc --> 키워드 접근도 가능
 
 
-
 def corpus_span(data ,tokenizer = Kkma(), corpus = None, stop_words = []):
     
     tokenizer = tokenizer
     
-    if corpus:
-        elements = corpus
-    
-    else:
-        elements = dict()
+    elements = corpus if corpus else dict()
     
     tokens = dict()
 
@@ -64,17 +60,19 @@ def corpus_span(data ,tokenizer = Kkma(), corpus = None, stop_words = []):
 
             else:
                 temp_token.append(elements[item])
-
+            
             
         tokens[iteration] = temp_token
-                
+    
     return elements, tokens
 
 
 def padding(tokenized_data, PAD = 0, evaluation = False, max_len = 0):
+
     '''
     tokenized_data : dictionary for training (key = number, items = Sequence)
     '''
+
     if evaluation:
         max_len = max_len
     else:

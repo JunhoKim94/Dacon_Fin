@@ -1,10 +1,36 @@
 from pytorch.utils.data import Dataset, Dataloader
 import threading
+from utils.preprocessing import *
+
+def tokenizer(data, idx,  tokenizer = Kkma(), corpus = None, stop_words = []):
+    
+    elements = corpus if corpus else dict()
+
+    temp_token = []
+    temp = tokenizer.nouns(data[idx])
+    for item in temp:
+        if item in stop_words:
+            continue
+
+        if elements.get(item) == None:
+
+            if corpus:
+                    pass
+
+            else:
+                num = len(elements) + 1
+                elements[item] = num
+                temp_token.append(num)
+
+        else:
+            temp_token.append(elements[item])
 
 
 class BaseDataset(Dataset):
+    def __init__(self, data_path):
+        self.data_path = data_path 
 
-
+    def getitem(self, idx):
 
 
 

@@ -77,7 +77,7 @@ def data_gen(data_path, stop_words, tokenizer = Kkma(), size = 2000):
     print(f"random_test : {target[np.random.choice(len(target), 10)]}")
 
     # train, validation split
-    train_val_ratio = 0.7
+    train_val_ratio = 0.9
     tmp = int(total_size * train_val_ratio)
 
     x_train = pad_tokens[:tmp]
@@ -175,7 +175,7 @@ def main():
 
     np.random.seed(941017)
     size = 2000
-    hidden_layer = 256
+    hidden_layer = 128
     num_layer = 3
 
     print("\n ==============================> Training Start <=============================")
@@ -217,7 +217,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
     test_path = "./data/public_test.csv"
     with open("./args.pickle", "rb") as handle:
         args = pickle.load(handle)
